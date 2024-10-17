@@ -23,12 +23,35 @@
       <li>{{ person.age }}</li>
     </ul>
     <button @click.prevent="randomAge">Changer l'âge</button>
+    <hr>
+    <h1>todo list</h1>
+    <form @submit.prevent="addTask">
+      <input type="text" v-model="newTask" placeholder="Ajouter une tâche">
+      <button>Ajouter</button>
+    </form>
+    <div v-if="tasks.length === 0">Aucune tâche à afficher.</div>
+    <div v-else>
+      <label>
+        <input type="checkbox" v-model="hideCompleted"> Masquer les tâches terminées
+      </label>
+
+      <ul>
+        <li v-for="task in filteredTasks" :key="task.id">
+          <input type="checkbox" v-model="task.completed">
+          <span :class="{ 'completed': task.completed }">{{ task.text }}</span>
+          <button @click="deleteTask(task.id)">Supprimer</button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
 
+  const newTask = ref('');
+  const tasks = ref([]);
+  const hideCompleted = ref(false);
   const count = ref(0)
   const movieName = ref('')
   const movies = ref([
@@ -68,10 +91,34 @@
         age:  Math.round(Math.random() * 100)
       }
     }
+
+    const addTask = () => {
+  if (newTask.value.trim()) {
+    tasks.value.push({
+      id: Date.now(),
+      text: newTask.value,
+      completed: false
+    });
+    newTask.value = '';
+  }
+};
+
+const filteredTasks = computed(() => {
+  return tasks.value
+    .filter(task => !hideCompleted.value || !task.completed)
+    .sort((a, b) => a.completed - b.completed);
+});
+
+const deleteTask = (taskId) => {
+    tasks.value = tasks.value.filter(task => task.id !== taskId);
+  };
 </script>
 
 <style>
 .active {
   border: 2px double orange;
+}
+.completed {
+  text-decoration: line-through;
 }
 </style>
