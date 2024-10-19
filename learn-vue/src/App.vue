@@ -24,6 +24,12 @@
     </ul>
     <button @click.prevent="randomAge">Changer l'âge</button>
     <hr>
+    <Layout>
+      <template v-slot:header>En tête</template>
+      <template v-slot:aside>Sidebar</template>
+      <template v-slot:main>Main</template>
+      <template v-slot:footer>Footer</template>
+    </Layout>
     <h1>todo list</h1>
     <form @submit.prevent="addTask">
       <input type="text" v-model="newTask" placeholder="Ajouter une tâche">
@@ -31,6 +37,9 @@
     </form>
     <div v-if="tasks.length === 0">Aucune tâche à afficher.</div>
     <div v-else>
+      <Button>
+        <strong>Demo</strong> de bouton
+      </Button>
       <label>
         <input type="checkbox" v-model="hideCompleted"> Masquer les tâches terminées
       </label>
@@ -42,12 +51,19 @@
           <button @click="deleteTask(task.id)">Supprimer</button>
         </li>
       </ul>
+      <p v-if="remainingTasks > 0">{{ remainingTasks }} tâche{{ remainingTasks > 1 ? 's' : '' }} à faire</p>
     </div>
+    <CheckBox label="test label" 
+    @checked="console.log('coché')"
+    @unchecked="console.log('décoché')"/>
   </div>
 </template>
 
 <script setup>
   import { ref, computed } from 'vue';
+  import CheckBox from './CheckBox.vue';
+  import Button from './Button.vue';
+  import Layout from './Layout.vue';
 
   const newTask = ref('');
   const tasks = ref([]);
@@ -104,6 +120,7 @@
 };
 
 const filteredTasks = computed(() => {
+
   return tasks.value
     .filter(task => !hideCompleted.value || !task.completed)
     .sort((a, b) => a.completed - b.completed);
@@ -112,6 +129,10 @@ const filteredTasks = computed(() => {
 const deleteTask = (taskId) => {
     tasks.value = tasks.value.filter(task => task.id !== taskId);
   };
+
+const remainingTasks = computed(() => {
+    return tasks.value.filter(task => !task.completed).length;
+  });
 </script>
 
 <style>
